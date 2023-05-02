@@ -14,7 +14,7 @@ namespace Ukesoppgave_3
     public class Game
     {
         private bool run = true;
-        private VirtualPet[] pets = { };
+        private VirtualPet[] pets = Array.Empty<VirtualPet>();
         private string menuId = "none";
         private int petId = 0;
         public string[] Foods = {"Pizza","Pasta","Sandwich"};
@@ -30,7 +30,7 @@ namespace Ukesoppgave_3
                     ShowPets();
                     Console.WriteLine("Actions: " + string.Join(" ",actions));
                     bool actionInput = false;
-                    while(action == null || action.ToLower().Replace(" ", "") == "" || !actions.Contains(action.ToLower())){
+                    while(string.IsNullOrEmpty(action) || action.ToLower().Replace(" ", "") == "" || !actions.Contains(action.Split(' ')[0])){
                         if (actionInput)
                         {
                             Console.WriteLine("Your action must be one of the following: " + string.Join(" ", actions));
@@ -38,22 +38,45 @@ namespace Ukesoppgave_3
                         action = Console.ReadLine();
                         actionInput = !actions.Contains(action.ToLower());
                     }
-                    if(action == "add pet")
+                    if(action == "add")
                     {
                         NewPet();
                     }
-                    else if (action.Split(" ").Contains("goto"))
+                    else if (action.ToLower().Contains("goto"))
                     {
-                        int numId;
-                        bool parsed = Int32.TryParse(action.Split(" ")[1],out numId);
-                        if (parsed)
+                        string[] comms = action.Split(' ');
+                        if(comms.Length > 1)
                         {
+                            bool parsed = Int32.TryParse(comms[1], out int numId);
+                            if (parsed)
+                            {
                             GotoPet(numId);
+                            }
+                            else
+                            {
+                                Console.WriteLine("ID must be a number");
+                            }
                         }
                         else
                         {
                             Console.WriteLine("You must include pet ID when using goto command I.E goto 0");
                         }
+                    }
+                }
+                else if(menuId == "pet")
+                {
+                    var actions = ShowActions();
+                    pets[petId].DescribePet();
+                    Console.WriteLine("Actions: " + string.Join(" ", actions));
+                    bool actionInput = false;
+                    while (action == null || action.ToLower().Replace(" ", "") == "" || !actions.Contains(action.ToLower()))
+                    {
+                        if (actionInput)
+                        {
+                            Console.WriteLine("Your action must be one of the following: " + string.Join(" ", actions));
+                        }
+                        action = Console.ReadLine();
+                        actionInput = !actions.Contains(action.ToLower()) && !string.IsNullOrEmpty(action);
                     }
                 }
             }
@@ -76,7 +99,7 @@ namespace Ukesoppgave_3
             if (menuId == "none")
             {
                 Array.Resize(ref actions, actions.Length+1);
-                actions[1] = "add pet";
+                actions[1] = "add";
             }
             else if(menuId == "pet")
             {
@@ -96,9 +119,7 @@ namespace Ukesoppgave_3
                 {
                     VirtualPet pet = pets[i];
                     Console.WriteLine(i+".");
-                    Console.WriteLine("-------");
                     pet.DescribePet();
-                    Console.WriteLine("-------");
                 }
             }
             else
@@ -158,11 +179,13 @@ namespace Ukesoppgave_3
         }
         public void DescribePet()
         {
+            Console.WriteLine("-------");
             Console.WriteLine("Pet: " + Name);
             Console.WriteLine("Health: " + health);
             Console.WriteLine("Closeness: " + closeness);
             Console.WriteLine("Fullness: " + fullness);
             Console.WriteLine("Favourite food: " + favouriteFood);
+            Console.WriteLine("-------");
         }
         public void FeedPet(string food)
         {
