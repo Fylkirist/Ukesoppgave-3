@@ -214,11 +214,12 @@ namespace Ukesoppgave_3
             }
             else if(_menuId == "pet")
             {
-                Array.Resize(ref actions, actions.Length+4);
+                Array.Resize(ref actions, actions.Length+5);
                 actions[2] = "feed";
                 actions[3] = "play";
                 actions[4] = "rename";
-                actions[5] = "back";
+                actions[5] = "show";
+                actions[6] = "back";
             }
             return actions;
         }
@@ -260,7 +261,7 @@ namespace Ukesoppgave_3
             else{
                 Array.Resize(ref _pets, _pets.Length+1);
                 string[] animalStrings = {"Rabbit","Cat","Dog" };
-                string selectedAnimal = animalStrings[_rand.Next()];
+                string selectedAnimal = animalStrings[_rand.Next(animalStrings.Length-1)];
                 switch (selectedAnimal)
                 {
                     case "Rabbit":
@@ -284,10 +285,10 @@ namespace Ukesoppgave_3
 
     public class VirtualPet
     {
-        private readonly string _art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
-        private int _fullness = 100;
-        private int _health = 100;
-        private int _closeness = 0;
+        protected string Art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
+        protected int Fullness = 100;
+        protected int Health = 100;
+        protected int Closeness = 0;
         public string? Name { get; set; }
         public VirtualPet(string? nameInput)
         {
@@ -297,14 +298,24 @@ namespace Ukesoppgave_3
         {
             Console.WriteLine("----------");
             Console.WriteLine("Pet: " + Name);
-            Console.WriteLine("Health: " + _health);
-            Console.WriteLine("Closeness: " + _closeness);
-            Console.WriteLine("Fullness: " + _fullness);
+            Console.WriteLine("Health: " + Health);
+            Console.WriteLine("Closeness: " + Closeness);
+            Console.WriteLine("Fullness: " + Fullness);
             Console.WriteLine("----------");
         }
         public void FeedPet(Food food)
         {
-
+            if (Fullness == 100)
+            {
+                Console.WriteLine(Name + " is already full! closeness -1, health -10");
+                Closeness -= 1;
+                Health -= 10;
+            }
+            else
+            {
+                Console.WriteLine("You fed the " + food.Name + " to " + Name + "fullness +" + food.Filling);
+                Fullness += food.Filling;
+            }
         }
         public void RenamePet(string? name)
         {
@@ -313,29 +324,41 @@ namespace Ukesoppgave_3
 
         public void Play()
         {
-            _closeness += 2;
-            _fullness -= 20;
-            Console.WriteLine("You played with "+ Name + " closeness +2, fullness -20");
-            if (_fullness < 50)
+            Closeness += 2;
+            Fullness -= 20;
+            if (Fullness < 0)
             {
-                _health -= 10;
+                Fullness = 0;
+            }
+            Console.WriteLine("You played with "+ Name + " closeness +2, fullness -20");
+            if (Fullness < 50)
+            {
+                Health -= 10;
                 Console.WriteLine(Name + " is too hungry to play: health -10");
+                if (Health < 0)
+                {
+                    Health = 0;
+                }
             }
             else
             {
-                _health += 10;
+                Health += 10;
                 Console.WriteLine(Name + " became stronger, health +10");
+                if (Health > 0)
+                {
+                    Health = 100;
+                }
             }
         }
 
         public void ShowPet()
         {
-            Console.WriteLine(_art);
+            Console.WriteLine(Art);
         }
     }
     public class Rabbit : VirtualPet
     {
-        private readonly string _art = "         ,\r\n        /|      __\r\n       / |   ,-~ /\r\n      Y :|  //  /\r\n      | jj /( .^\r\n      >-\"~\"-v\"\r\n     /       Y\r\n    jo  o    |\r\n   ( ~T~     j\r\n    >._-' _./\r\n   /   \"~\"  |\r\n  Y     _,  |\r\n /| ;-\"~ _  l\r\n/ l/ ,-\"~    \\\r\n\\//\\/      .- \\\r\n Y        /    Y    -Row\r\n l       I     !\r\n ]\\      _\\    /\"\\\r\n(\" ~----( ~   Y.  )";
+        protected new string Art = "         ,\r\n        /|      __\r\n       / |   ,-~ /\r\n      Y :|  //  /\r\n      | jj /( .^\r\n      >-\"~\"-v\"\r\n     /       Y\r\n    jo  o    |\r\n   ( ~T~     j\r\n    >._-' _./\r\n   /   \"~\"  |\r\n  Y     _,  |\r\n /| ;-\"~ _  l\r\n/ l/ ,-\"~    \\\r\n\\//\\/      .- \\\r\n Y        /    Y    -Row\r\n l       I     !\r\n ]\\      _\\    /\"\\\r\n(\" ~----( ~   Y.  )";
         public Rabbit(string? nameInput) : base(nameInput)
         {
 
@@ -343,52 +366,90 @@ namespace Ukesoppgave_3
 
         public void FeedPet(Pizza food)
         {
-
+            if (Fullness == 100)
+            {
+                Console.WriteLine(Name + " is already full! closeness -1, health -10");
+                Closeness -= 1;
+                Health -= 10;
+            }
+            else
+            {
+                Console.WriteLine(food.Name + " is " + Name+"'s favourite food! closeness +2, fullness +" + food.Filling);
+                Closeness += 2;
+                Fullness += food.Filling;
+            }
         }
     }
 
     public class Cat : VirtualPet
     {
-        private readonly string _art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
+        protected new string Art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
         public Cat(string? nameInput) : base(nameInput)
         {
 
         }
         public void FeedPet(Pasta food)
         {
-
+            {
+                if (Fullness == 100)
+                {
+                    Console.WriteLine(Name + " is already full! closeness -1, health -10");
+                    Closeness -= 1;
+                    Health -= 10;
+                }
+                else
+                {
+                    Console.WriteLine(food.Name + " is " + Name + "'s favourite food! closeness +2, fullness +" + food.Filling);
+                    Closeness += 2;
+                    Fullness += food.Filling;
+                }
+            }
         }
     }
 
     public class Dog : VirtualPet
     {
-        private readonly string _art = "   |\\|\\\r\n  ..    \\       .\r\no--     \\\\    / @)\r\n v__///\\\\\\\\__/ @\r\n   {           }\r\n    {  } \\\\\\{  }\r\n    <_|      <_|";
+        protected new string Art = "   |\\|\\\r\n  ..    \\       .\r\no--     \\\\    / @)\r\n v__///\\\\\\\\__/ @\r\n   {           }\r\n    {  } \\\\\\{  }\r\n    <_|      <_|";
         public Dog(string? nameInput) : base(nameInput)
         {
 
         }
         public void FeedPet(Sandwich food)
         {
-
+            {
+                if (Fullness == 100)
+                {
+                    Console.WriteLine(Name + " is already full! closeness -1, health -10");
+                    Closeness -= 1;
+                    Health -= 10;
+                }
+                else
+                {
+                    Console.WriteLine(food.Name + " is " + Name + "'s favourite food! closeness +2, fullness +" + food.Filling);
+                    Closeness += 2;
+                    Fullness += food.Filling;
+                }
+            }
         }
     }
     public class Food
     {
-        
+        public string Name = "food";
+        public int Filling = 0;
     }
     public class Pizza : Food
     {
-        private string _name = "Pizza";
-        public int Filling = 23;
+        public new string Name = "Pizza";
+        public new int Filling = 23;
     }
     public class Pasta : Food
     {
-        private string _name = "Pasta";
-        public int Filling = 17;
+        public new string Name = "Pasta";
+        public new int Filling = 17;
     }
     public class Sandwich : Food
     {
-        private string _name = "Sandwich";
-        public int Filling = 15;
+        public new string Name = "Sandwich";
+        public new int Filling = 15;
     }
 }
