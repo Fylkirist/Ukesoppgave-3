@@ -162,7 +162,7 @@
         }
         private void RenamePet()
         {
-            Console.WriteLine("Please enter new name for " + _pets[_petId].Name + "or cancel to stop name change");
+            Console.WriteLine("Please enter new name for " + _pets[_petId].Name + " or cancel to stop name change");
             while(true)
             {
                 string? input = Console.ReadLine();
@@ -275,7 +275,7 @@
                         _pets[^1] = new Dog(newName, "   |\\|\\\r\n  ..    \\       .\r\no--     \\\\    / @)\r\n v__///\\\\\\\\__/ @\r\n   {           }\r\n    {  } \\\\\\{  }\r\n    <_|      <_|");
                         break;
                 }
-                Console.WriteLine("New " + selectedAnimal +  " " + newName + "added!");
+                Console.WriteLine("New " + selectedAnimal +  " " + newName + " added!");
             }
         }
         private bool IsUnique(string name)
@@ -320,6 +320,8 @@
                 Console.WriteLine("You fed the " + food.Name + " to " + Name + "fullness +" + food.Filling);
                 Fullness += food.Filling;
             }
+
+            if (Fullness > 100) Fullness = 100;
         }
         public void FeedPet(Food food, bool isFavourite)
         {
@@ -335,6 +337,7 @@
                 Closeness += 2;
                 Fullness += food.Filling;
             }
+            if (Fullness > 100) Fullness = 100;
         }
         public void RenamePet(string? name)
         {
