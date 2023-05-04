@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Ukesoppgave_3
+﻿namespace Ukesoppgave_3
 {
     internal class Program
     {
@@ -17,7 +15,7 @@ namespace Ukesoppgave_3
         private VirtualPet[] _pets = Array.Empty<VirtualPet>();
         private string _menuId = "none";
         private int _petId = 0;
-        public Dictionary<string,Food> Foods = new() { {"pizza",new Pizza()}, { "pasta",new Pasta() }, { "sandwich", new Sandwich() } };
+        public Dictionary<string,Food> Foods = new() { {"pizza",new Food("Pizza",23)}, { "pasta",new Food("Pasta",19) }, { "sandwich", new Food("15",15) } };
         private static Random _rand = new();
         public void InitGameLoop()
         {
@@ -90,7 +88,7 @@ namespace Ukesoppgave_3
                     Console.WriteLine("Available foods: " + string.Join(" ",Foods.Keys.Select(k=>k).ToArray()));
                     Console.WriteLine("Actions: " + string.Join(" ", actions));
                     bool actionInput = false;
-                    while (string.IsNullOrWhiteSpace(action) || !actions.Contains(action))
+                    while (string.IsNullOrWhiteSpace(action) || !actions.Contains(action.Split(' ')[0]))
                     {
                         if (actionInput)
                         {
@@ -128,7 +126,10 @@ namespace Ukesoppgave_3
                         string[] coms = action.Split(" ");
                         if (coms.Length > 1 && Foods.ContainsKey(coms[^1]))
                         {
-                            _pets[-_petId].FeedPet(Foods[coms[^1]]);
+                            if (coms[^1] == _pets[_petId].FavouriteFood.ToLower())
+                                _pets[_petId].FeedPet(Foods[coms[^1]],true);
+                            else
+                                _pets[_petId].FeedPet(Foods[coms[^1]]);
                         }
                         else
                         {
@@ -142,7 +143,7 @@ namespace Ukesoppgave_3
                     }
                     else if (action.ToLower() == "show")
                     {
-                        _pets[_petId].ShowPet();
+                        _pets[_petId].ShowPet(_pets[_petId].Art);
                     }
                 }
             }
@@ -265,13 +266,13 @@ namespace Ukesoppgave_3
                 switch (selectedAnimal)
                 {
                     case "Rabbit":
-                        _pets[^1] = new Rabbit(newName);
+                        _pets[^1] = new Rabbit(newName, "         ,\r\n        /|      __\r\n       / |   ,-~ /\r\n      Y :|  //  /\r\n      | jj /( .^\r\n      >-\"~\"-v\"\r\n     /       Y\r\n    jo  o    |\r\n   ( ~T~     j\r\n    >._-' _./\r\n   /   \"~\"  |\r\n  Y     _,  |\r\n /| ;-\"~ _  l\r\n/ l/ ,-\"~    \\\r\n\\//\\/      .- \\\r\n Y        /    Y    -Row\r\n l       I     !\r\n ]\\      _\\    /\"\\\r\n(\" ~----( ~   Y.  )");
                         break;
                     case "Cat":
-                        _pets[^1] = new Cat(newName);
+                        _pets[^1] = new Cat(newName, "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ");
                         break;
                     case "Dog":
-                        _pets[^1] = new Dog(newName);
+                        _pets[^1] = new Dog(newName, "   |\\|\\\r\n  ..    \\       .\r\no--     \\\\    / @)\r\n v__///\\\\\\\\__/ @\r\n   {           }\r\n    {  } \\\\\\{  }\r\n    <_|      <_|");
                         break;
                 }
                 Console.WriteLine("New " + selectedAnimal +  " " + newName + "added!");
@@ -285,14 +286,17 @@ namespace Ukesoppgave_3
 
     public class VirtualPet
     {
-        protected string Art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
+        public string FavouriteFood;
+        public string Art;
         protected int Fullness = 100;
         protected int Health = 100;
         protected int Closeness = 0;
         public string? Name { get; set; }
-        public VirtualPet(string? nameInput)
+        public VirtualPet(string? nameInput, string ascii)
         {
             Name = nameInput;
+            Art = ascii;
+            FavouriteFood = "";
         }
         public void DescribePet()
         {
@@ -314,6 +318,21 @@ namespace Ukesoppgave_3
             else
             {
                 Console.WriteLine("You fed the " + food.Name + " to " + Name + "fullness +" + food.Filling);
+                Fullness += food.Filling;
+            }
+        }
+        public void FeedPet(Food food, bool isFavourite)
+        {
+            if (Fullness == 100)
+            {
+                Console.WriteLine(Name + " is already full! closeness -1, health -10");
+                Closeness -= 1;
+                Health -= 10;
+            }
+            else
+            {
+                Console.WriteLine(food.Name + " is " + Name + "'s favourite food! closeness +2, fullness +" + food.Filling);
+                Closeness += 2;
                 Fullness += food.Filling;
             }
         }
@@ -351,105 +370,43 @@ namespace Ukesoppgave_3
             }
         }
 
-        public void ShowPet()
+        public void ShowPet(string ascii)
         {
-            Console.WriteLine(Art);
+            Console.WriteLine(ascii);
         }
     }
     public class Rabbit : VirtualPet
     {
-        protected new string Art = "         ,\r\n        /|      __\r\n       / |   ,-~ /\r\n      Y :|  //  /\r\n      | jj /( .^\r\n      >-\"~\"-v\"\r\n     /       Y\r\n    jo  o    |\r\n   ( ~T~     j\r\n    >._-' _./\r\n   /   \"~\"  |\r\n  Y     _,  |\r\n /| ;-\"~ _  l\r\n/ l/ ,-\"~    \\\r\n\\//\\/      .- \\\r\n Y        /    Y    -Row\r\n l       I     !\r\n ]\\      _\\    /\"\\\r\n(\" ~----( ~   Y.  )";
-        public Rabbit(string? nameInput) : base(nameInput)
+        public Rabbit(string? nameInput,string ascii) : base(nameInput, ascii)
         {
-
-        }
-
-        public void FeedPet(Pizza food)
-        {
-            if (Fullness == 100)
-            {
-                Console.WriteLine(Name + " is already full! closeness -1, health -10");
-                Closeness -= 1;
-                Health -= 10;
-            }
-            else
-            {
-                Console.WriteLine(food.Name + " is " + Name+"'s favourite food! closeness +2, fullness +" + food.Filling);
-                Closeness += 2;
-                Fullness += food.Filling;
-            }
+            FavouriteFood = "Pizza";
         }
     }
 
     public class Cat : VirtualPet
     {
-        protected new string Art = "(\"`-''-/\").___..--''\"`-._ \r\n `6_ 6  )   `-.  (     ).`-.__.`) \r\n (_Y_.)'  ._   )  `._ `. ``-..-' \r\n   _..`--'_..-_/  /--'_.'\r\n  ((((.-''  ((((.'  (((.-' ";
-        public Cat(string? nameInput) : base(nameInput)
+        public Cat(string? nameInput, string ascii) : base(nameInput, ascii)
         {
-
-        }
-        public void FeedPet(Pasta food)
-        {
-            {
-                if (Fullness == 100)
-                {
-                    Console.WriteLine(Name + " is already full! closeness -1, health -10");
-                    Closeness -= 1;
-                    Health -= 10;
-                }
-                else
-                {
-                    Console.WriteLine(food.Name + " is " + Name + "'s favourite food! closeness +2, fullness +" + food.Filling);
-                    Closeness += 2;
-                    Fullness += food.Filling;
-                }
-            }
+            FavouriteFood = "Pasta";
         }
     }
 
     public class Dog : VirtualPet
     {
-        protected new string Art = "   |\\|\\\r\n  ..    \\       .\r\no--     \\\\    / @)\r\n v__///\\\\\\\\__/ @\r\n   {           }\r\n    {  } \\\\\\{  }\r\n    <_|      <_|";
-        public Dog(string? nameInput) : base(nameInput)
+        public Dog(string? nameInput, string ascii) : base(nameInput, ascii)
         {
-
-        }
-        public void FeedPet(Sandwich food)
-        {
-            {
-                if (Fullness == 100)
-                {
-                    Console.WriteLine(Name + " is already full! closeness -1, health -10");
-                    Closeness -= 1;
-                    Health -= 10;
-                }
-                else
-                {
-                    Console.WriteLine(food.Name + " is " + Name + "'s favourite food! closeness +2, fullness +" + food.Filling);
-                    Closeness += 2;
-                    Fullness += food.Filling;
-                }
-            }
+            FavouriteFood = "Sandwich";
         }
     }
+
     public class Food
     {
-        public string Name = "food";
-        public int Filling = 0;
-    }
-    public class Pizza : Food
-    {
-        public new string Name = "Pizza";
-        public new int Filling = 23;
-    }
-    public class Pasta : Food
-    {
-        public new string Name = "Pasta";
-        public new int Filling = 17;
-    }
-    public class Sandwich : Food
-    {
-        public new string Name = "Sandwich";
-        public new int Filling = 15;
+        public string Name;
+        public int Filling;
+        public Food(string name, int filling)
+        {
+            Name = name;
+            Filling = filling;
+        }
     }
 }
